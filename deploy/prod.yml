@@ -29,3 +29,4 @@ spec:
       value: tbd-spangre-utsettelser-v1
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
+  restartPolicy: Never
