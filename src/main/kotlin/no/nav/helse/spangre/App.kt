@@ -13,7 +13,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
 
 internal val log = LoggerFactory.getLogger("spangre-utsettelser")
-internal val aivenOppgaveTopicName = "tbd.spre-oppgaver"
+internal const val aivenOppgaveTopicName = "tbd.spre-oppgaver"
 
 fun main() {
     val env = System.getenv()
@@ -40,7 +40,7 @@ fun launchApplication(
 internal fun RapidsConnection.registerRivers(
     producer: KafkaProducer<String, String>
 ) {
-    InntektsmeldingerRiver(this)
+    InntektsmeldingerRiver(this, producer)
 }
 
 private fun createAivenProducer(env: Map<String, String>): KafkaProducer<String, String> {
