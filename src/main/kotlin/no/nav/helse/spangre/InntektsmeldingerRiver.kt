@@ -27,7 +27,7 @@ class InntektsmeldingerRiver(rapidsConnection: RapidsConnection) :
         val dokumentId = packet.dokumentId()
 
         sjekkUtbetalingTilSøker(packet)
-        log.info("Inntektsmelding nummer ${antallIMLest }oppdaget: {} og {}", keyValue("hendelseId", hendelseId), keyValue("dokumentId", dokumentId))
+        log.info("Inntektsmelding nummer ${antallIMLest } oppdaget: {} og {}", keyValue("hendelseId", hendelseId), keyValue("dokumentId", dokumentId))
 
         if (++antallIMLest == 5) System.exit(0)
     }
