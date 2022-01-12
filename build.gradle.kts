@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val jvmTargetVersion = "17"
 val gradleWrapperVersion = "7.3.1"
 
@@ -26,7 +24,7 @@ tasks {
         archiveFileName.set("app.jar")
 
         manifest {
-            attributes["Main-Class"] = "no.nav.helse.spangre.ApplicationKt"
+            attributes["Main-Class"] = "no.nav.helse.spangre.AppKt"
             attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(separator = " ") {
                 it.name
             }
