@@ -1,12 +1,9 @@
 package no.nav.helse.spangre
 
+import no.nav.helse.rapids_rivers.*
+import java.time.LocalDate
 import java.util.*
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.rapids_rivers.JsonMessage
-import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
-import no.nav.helse.rapids_rivers.isMissingOrNull
+import kotlin.system.exitProcess
 
 class InntektsmeldingerRiver(rapidsConnection: RapidsConnection) :
     River.PacketListener {
@@ -17,6 +14,7 @@ class InntektsmeldingerRiver(rapidsConnection: RapidsConnection) :
             validate { it.requireKey("@id") }
             validate { it.requireKey("inntektsmeldingId") }
             validate { it.requireKey("beregnetInntekt") }
+            validate { it.requireKey("@opprettet") }
             validate { it.requireValue("@event_name", "inntektsmelding") }
             validate { it.interestedIn("refusjon.beloepPrMnd") }
         }.register(this)
@@ -27,9 +25,12 @@ class InntektsmeldingerRiver(rapidsConnection: RapidsConnection) :
         val dokumentId = packet.dokumentId()
 
         sjekkUtbetalingTilSøker(packet)
-        log.info("Inntektsmelding nummer ${antallIMLest } oppdaget: {} og {}", keyValue("hendelseId", hendelseId), keyValue("dokumentId", dokumentId))
+        if (++antallIMLest % 500 == 0) log.info("Inntektsmelding nummer ${++antallIMLest } lest 🐧")
 
-        if (++antallIMLest == 5) System.exit(0)
+        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2022, 1, 11).atStartOfDay()) {
+            log.info("Antall IM lest: $antallIMLest. Avslutter jobben.")
+            exitProcess(0)
+        }
     }
 
     private fun sjekkUtbetalingTilSøker(packet: JsonMessage) {
