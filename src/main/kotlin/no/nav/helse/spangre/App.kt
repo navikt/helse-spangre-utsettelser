@@ -1,5 +1,6 @@
 package no.nav.helse.spangre
 
+import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -15,7 +16,14 @@ internal val log = LoggerFactory.getLogger("spangre-utsettelser")
 internal val aivenOppgaveTopicName = "tbd.spre-oppgaver"
 
 fun main() {
-    val rapidsConnection = launchApplication(System.getenv())
+    val env = System.getenv()
+    Spol(
+        env,
+        "tbd.rapid.v1",
+        "tbd-spangre-utsettelser-v1",
+        LocalDateTime.of(2021, 10, 18, 12, 0, 0)
+    ).spol()
+    val rapidsConnection = launchApplication(env)
     rapidsConnection.start()
 }
 
@@ -53,4 +61,3 @@ private fun createAivenProducer(env: Map<String, String>): KafkaProducer<String,
     }
     return KafkaProducer(properties, StringSerializer(), StringSerializer())
 }
-
