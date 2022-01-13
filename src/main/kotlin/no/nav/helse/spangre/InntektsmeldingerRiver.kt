@@ -27,7 +27,7 @@ class InntektsmeldingerRiver(rapidsConnection: RapidsConnection) :
         sjekkUtbetalingTilSøker(packet)
         if (++antallIMLest % 500 == 0) log.info("Inntektsmelding nummer ${++antallIMLest } lest 🐧")
 
-        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2022, 1, 11).atStartOfDay()) {
+        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2021, 10, 21).atStartOfDay()) {
             log.info("Antall IM lest: $antallIMLest. Avslutter jobben.")
             exitProcess(0)
         }
