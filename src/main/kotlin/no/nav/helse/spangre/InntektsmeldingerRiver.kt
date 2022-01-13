@@ -24,10 +24,11 @@ class InntektsmeldingerRiver(rapidsConnection: RapidsConnection) :
         val hendelseId = UUID.fromString(packet["@id"].asText())
         val dokumentId = packet.dokumentId()
 
-        sjekkUtbetalingTilSøker(packet)
-        if (++antallIMLest % 500 == 0) log.info("Inntektsmelding nummer ${++antallIMLest } lest 🐧")
+//        sjekkUtbetalingTilSøker(packet)
+        if   (++antallIMLest % 500 == 0) log.info("Inntektsmelding nummer ${++antallIMLest } lest 🐧")
+        if (++antallIMLest % 10000 == 0) log.info("Inntektsmelding med dato ${packet["@opprettet"].asLocalDateTime()}")
 
-        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2021, 10, 21).atStartOfDay()) {
+        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2021, 10, 31).atStartOfDay()) {
             log.info("Antall IM lest: $antallIMLest. Avslutter jobben.")
             exitProcess(0)
         }

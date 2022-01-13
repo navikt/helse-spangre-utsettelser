@@ -17,12 +17,12 @@ internal val aivenOppgaveTopicName = "tbd.spre-oppgaver"
 
 fun main() {
     val env = System.getenv()
-    Spol(
-        env,
-        "tbd.rapid.v1",
-        "tbd-spangre-utsettelser-v1",
-        LocalDateTime.of(2021, 10, 18, 12, 0, 0)
-    ).spol()
+//    Spol(
+//        env,
+//        "tbd.rapid.v1",
+//        "tbd-spangre-utsettelser-v1",
+//        LocalDateTime.of(2021, 10, 18, 12, 0, 0)
+//    ).spol()
     val rapidsConnection = launchApplication(env)
     rapidsConnection.start()
 }
