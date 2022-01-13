@@ -38,8 +38,7 @@ class InntektsmeldingerRiver(
         if (antallIMMedUTSLest % 500 == 0) log.info("Inntektsmelding med utbetaling til søker nummer ${antallIMMedUTSLest} lest 🤒")
         if (antallIMLest % 10000 == 0) log.info("Inntektsmelding med dato ${packet["@opprettet"].asLocalDateTime()} 📆")
 
-//        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2021, 10, 31).atStartOfDay()) {
-        if (antallIMMedUTSLest == 1) {
+        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2022, 1, 11).atStartOfDay()) {
             log.info("Antall IM lest: $antallIMLest, antall IM med utbetaling til søker lest: $antallIMMedUTSLest. Avslutter jobben 💀")
             exitProcess(0)
         }
@@ -50,7 +49,6 @@ class InntektsmeldingerRiver(
         val inntekt = packet["beregnetInntekt"].asInt()
         return refusjon != inntekt
     }
-
 }
 
 private fun JsonMessage.dokumentId() =
