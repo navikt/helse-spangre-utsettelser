@@ -14,9 +14,7 @@ spec:
     requests:
       cpu: 1000m
       memory: 512Mi
-  replicas:
-    min: 12
-    max: 24
+  parallelism: 24
     cpuThresholdPercentage: 90
   azure:
     application:
