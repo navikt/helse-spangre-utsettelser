@@ -7,6 +7,20 @@ metadata:
     team: tbd
 spec:
   image: {{image}}
+  startup:
+    failureThreshold: 10
+    initialDelay: 20
+    path: /isready
+    periodSeconds: 5
+    port: 8080
+    timeout: 1
+  liveness:
+    failureThreshold: 10
+    initialDelay: 20
+    path: /isalive
+    periodSeconds: 5
+    port: 8080
+    timeout: 1
   resources:
     limits:
       cpu: 2000m
