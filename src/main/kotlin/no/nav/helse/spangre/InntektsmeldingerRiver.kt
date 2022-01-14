@@ -1,11 +1,14 @@
 package no.nav.helse.spangre
 
-import no.nav.helse.rapids_rivers.*
+import java.util.*
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import no.nav.helse.rapids_rivers.asLocalDateTime
+import no.nav.helse.rapids_rivers.isMissingOrNull
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
 import kotlin.system.exitProcess
 
 class InntektsmeldingerRiver(
@@ -13,7 +16,7 @@ class InntektsmeldingerRiver(
     private val producer: KafkaProducer<String, String>,
 ) : River.PacketListener {
     private var antallIMLest = 0
-    private var antallIMMedUTSLest = 0
+    private var antallIMMedFRLest = 0
 
     init {
         River(rapidsConnection).apply {
@@ -28,21 +31,25 @@ class InntektsmeldingerRiver(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         ++antallIMLest
 
-        if (erUtbetalingTilSøker(packet)) {
-            ++antallIMMedUTSLest
-            producer.send(ProducerRecord(aivenOppgaveTopicName, packet.tilOppgaveDTO()))
-            log.info("Ny timeout sendt for ${packet.dokumentId()} ⏰")
+        if (erFullRefusjon(packet)) {
+            ++antallIMMedFRLest
+//            producer.send(ProducerRecord(aivenOppgaveTopicName, packet.tilOppgaveDTO()))
+//            log.info("Ny timeout sendt for ${packet.dokumentId()} ⏰")
+            log.info("Ny timeout ville ha blitt sendt for ${packet.dokumentId()} ⏰")
         }
 
         if (antallIMLest % 500 == 0) log.info("Inntektsmelding nummer ${antallIMLest} lest 🐧")
-        if (antallIMMedUTSLest % 500 == 0) log.info("Inntektsmelding med utbetaling til søker nummer ${antallIMMedUTSLest} lest 🤒")
-        if (antallIMLest % 10000 == 0) log.info("Inntektsmelding med dato ${packet["@opprettet"].asLocalDateTime()} 📆")
+        if (antallIMMedFRLest % 500 == 0) log.info("Inntektsmelding med full refusjon nummer ${antallIMMedFRLest} lest 🤒")
+        if (antallIMLest % 1000 == 0) log.info("Inntektsmelding med dato ${packet.opprettet()} 📆")
 
-        if (packet["@opprettet"].asLocalDateTime() > LocalDate.of(2022, 1, 11).atStartOfDay()) {
-            log.info("Antall IM lest: $antallIMLest, antall IM med utbetaling til søker lest: $antallIMMedUTSLest. Avslutter jobben 💀")
+//        if (packet.opprettet() > LocalDate.of(2022, 1, 14).atStartOfDay()) {
+        if (antallIMMedFRLest == 1000) {
+            log.info("Antall IM lest: $antallIMLest, antall IM med full refusjon lest: $antallIMMedFRLest. Avslutter jobben 💀")
             exitProcess(0)
         }
     }
+
+    private fun erFullRefusjon(packet: JsonMessage) = !erUtbetalingTilSøker(packet)
 
     private fun erUtbetalingTilSøker(packet: JsonMessage): Boolean {
         val refusjon = packet["refusjon.beloepPrMnd"].takeUnless { it.isMissingOrNull() }?.asInt()
@@ -51,16 +58,20 @@ class InntektsmeldingerRiver(
     }
 }
 
+private fun JsonMessage.opprettet() = this["@opprettet"].asLocalDateTime()
+
 private fun JsonMessage.dokumentId() =
     UUID.fromString(this["inntektsmeldingId"].asText())
 
 private fun JsonMessage.tilOppgaveDTO(): String {
-    return java.lang.String("""
+    return java.lang.String(
+        """
         {
             "dokumentType": "Inntektsmelding",
             "oppdateringstype": "Utsett",
             "dokumentId": "${dokumentId()}",
-            "timeout": "${LocalDateTime.now().plusDays(1)}"
+            "timeout": "${opprettet().plusDays(40)}"
         }
-    """).replaceAll("[\\r\\n\\s]+", "")
+    """
+    ).replaceAll("[\\r\\n\\s]+", "")
 }

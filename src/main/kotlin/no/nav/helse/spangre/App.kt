@@ -1,9 +1,9 @@
 package no.nav.helse.spangre
 
-import java.time.LocalDateTime
 import java.util.*
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.RapidsConnection.StatusListener
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -11,6 +11,7 @@ import org.apache.kafka.common.config.SslConfigs
 import org.apache.kafka.common.security.auth.SecurityProtocol
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
 
 internal val log = LoggerFactory.getLogger("spangre-utsettelser")
 internal const val aivenOppgaveTopicName = "tbd.spre-oppgaver"
@@ -24,6 +25,12 @@ fun main() {
 //        LocalDateTime.of(2021, 10, 18, 12, 0, 0)
 //    ).spol()
     val rapidsConnection = launchApplication(env)
+    rapidsConnection.register(object: StatusListener {
+        override fun onShutdown(rapidsConnection: RapidsConnection) {
+            log.info("Noe gikk galt - avslutter 📴")
+            exitProcess(1)
+        }
+    })
     rapidsConnection.start()
 }
 
