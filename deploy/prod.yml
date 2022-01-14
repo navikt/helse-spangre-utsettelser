@@ -15,7 +15,6 @@ spec:
       cpu: 1000m
       memory: 512Mi
   parallelism: 24
-  restartPolicy: OnFailure
   azure:
     application:
       enabled: true
